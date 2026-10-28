@@ -1,0 +1,50 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # As doze pecas nao sao digitadas: elas sao derivadas fazendo um poliomino
+      # crescer uma celula de cada vez. E o juiz le o DESENHO pronto, letra por
+      # letra, remonta cada peca e confere que ela e a peca daquele nome, sem
+      # saber nada de mascara nem de busca.
+      - name: testes
+        run: dotnet test testes/Pentominos.Testes/Pentominos.Testes.csproj -c Release --nologo -v q
+
+      - name: as pecas derivadas, nao digitadas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- pecas
+
+      - name: as caixas de 60 celulas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- caixas
+
+      - name: achar uma contra achar todas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- primeira
+
+      - name: o que a poda do buraco pequeno vale
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- poda
+
+      - name: orientacoes e lugares de cada peca
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- orientacoes
+
+      - name: as duas solucoes de 3 por 20
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- tresporvinte
+
+      - name: toda solucao passa pelo juiz
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- juiz
